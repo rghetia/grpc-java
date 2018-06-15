@@ -36,7 +36,10 @@ import io.grpc.MethodDescriptor;
 import io.grpc.ServerStreamTracer;
 import io.grpc.Status;
 import io.grpc.StreamTracer;
+import io.opencensus.common.ServerStatsDeserializationException;
 import io.opencensus.contrib.grpc.metrics.RpcMeasureConstants;
+import io.opencensus.common.ServerStatsEncoding;
+import io.opencensus.common.ServerStats;
 import io.opencensus.stats.MeasureMap;
 import io.opencensus.stats.Stats;
 import io.opencensus.stats.StatsRecorder;
@@ -427,6 +430,7 @@ public final class CensusStatsModule {
     @Nullable
     private static final AtomicLongFieldUpdater<ServerTracer> inboundUncompressedSizeUpdater;
 
+
     /**
      * When using Atomic*FieldUpdater, some Samsung Android 5.0.x devices encounter a bug in their
      * JDK reflection API that triggers a NoSuchFieldException. When this occurs, we fallback to
@@ -487,6 +491,25 @@ public final class CensusStatsModule {
     private volatile long inboundWireSize;
     private volatile long outboundUncompressedSize;
     private volatile long inboundUncompressedSize;
+    static final String CENSUS_SERVER_STATS_BIN = "census-server-stats-bin";
+    private static final Metadata.BinaryMarshaller<ServerStats> SERVER_STATS_BINARY_MARSHALLER =
+        new Metadata.BinaryMarshaller<ServerStats>() {
+          @Override
+          public byte[] toBytes(ServerStats serverStats) {
+            return ServerStatsEncoding.toBytes(serverStats);
+          }
+
+          @Override
+          public ServerStats parseBytes(byte[] serialized) {
+            try {
+              return ServerStatsEncoding.parseBytes(serialized);
+            } catch (ServerStatsDeserializationException e) {
+              return null;
+            }
+          }
+        };
+    private static final Metadata.Key<ServerStats> SERVER_STATS_KEY =
+        Metadata.Key.of(CENSUS_SERVER_STATS_BIN, SERVER_STATS_BINARY_MARSHALLER);
 
     ServerTracer(
         CensusStatsModule module,
@@ -565,6 +588,16 @@ public final class CensusStatsModule {
         outboundMessageCountUpdater.getAndIncrement(this);
       } else {
         outboundMessageCount++;
+      }
+    }
+
+    @Override
+    @SuppressWarnings("NonAtomicVolatileUpdate")
+    public void addServerStatsTrailer(Metadata trailers) {
+      if (trailers != null) {
+        ServerStats serverStats = ServerStats.create(0L, stopwatch.elapsed(TimeUnit.NANOSECONDS),
+            (byte) 0);
+        trailers.put(SERVER_STATS_KEY, serverStats);
       }
     }
 

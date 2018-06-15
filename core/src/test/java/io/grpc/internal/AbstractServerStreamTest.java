@@ -265,7 +265,7 @@ public class AbstractServerStreamTest {
   @Test
   public void writeMessage_ignoreIfFramerClosed() {
     stream.writeHeaders(new Metadata());
-    stream.endOfMessages();
+    stream.endOfMessages(null);
     reset(sink);
 
     stream.writeMessage(new ByteArrayInputStream(new byte[]{}));

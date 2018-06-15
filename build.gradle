@@ -104,7 +104,9 @@ subprojects {
         protobufVersion = '3.5.1'
         protocVersion = '3.5.1-1'
         protobufNanoVersion = '3.0.0-alpha-5'
-        opencensusVersion = '0.12.3'
+        // TODO: Remove before PR
+        //opencensusVersion = '0.12.3'
+        opencensusVersion = '0.16.0-SNAPSHOT'
 
         configureProtoCompilation = {
           String generatedSourcePath = "${projectDir}/src/generated"
@@ -253,7 +255,7 @@ subprojects {
                     libraries.mockito,
                     libraries.truth
 
-        // Configuration for modules that use Jetty ALPN agent
+                // Configuration for modules that use Jetty ALPN agent
         alpnagent libraries.jetty_alpn_agent
 
         jmh 'org.openjdk.jmh:jmh-core:1.19',

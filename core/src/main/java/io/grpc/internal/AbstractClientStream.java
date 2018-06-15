@@ -188,7 +188,7 @@ public abstract class AbstractClientStream extends AbstractStream
   public final void halfClose() {
     if (!transportState().isOutboundClosed()) {
       transportState().setOutboundClosed();
-      endOfMessages();
+      endOfMessages(null);
     }
   }
 
@@ -508,6 +508,11 @@ public abstract class AbstractClientStream extends AbstractStream
       abstractClientStreamSink().writeHeaders(headers, payload);
       payload = null;
       headers = null;
+    }
+
+    /** Closes, with flush. Only-used on server-side. */
+    @Override
+    public void close(@Nullable Metadata trailers) {
     }
 
     /** Closes, without flush. */

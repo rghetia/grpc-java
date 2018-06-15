@@ -17,7 +17,9 @@
 package io.grpc.internal;
 
 import io.grpc.Compressor;
+import io.grpc.Metadata;
 import java.io.InputStream;
+import javax.annotation.Nullable;
 
 /** Interface for framing gRPC messages. */
 public interface Framer {
@@ -36,6 +38,9 @@ public interface Framer {
 
   /** Closes, with flush. */
   void close();
+
+  /** Closes, with flush and updates trailers if provided */
+  void close(@Nullable Metadata trailers);
 
   /** Closes, without flush. */
   void dispose();

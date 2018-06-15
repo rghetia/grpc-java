@@ -55,6 +55,15 @@ public abstract class ServerStreamTracer extends StreamTracer {
   public void serverCallStarted(ServerCall<?, ?> call) {
   }
 
+  /**
+   * Called when {@link ServerCall} is closed.  This is for the tracer to report server stats in
+   * form of metadata trailers.
+   *
+   * This is only called on the server-side.
+   */
+  public void addServerStatsTrailer(Metadata trailers) {
+  }
+
   public abstract static class Factory {
     /**
      * Creates a {@link ServerStreamTracer} for a new server stream.

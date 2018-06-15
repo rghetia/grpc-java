@@ -136,8 +136,21 @@ public final class StatsTraceContext {
   }
 
   /**
-   * See {@link StreamTracer#streamClosed}. This may be called multiple times, and only the first
-   * value will be taken.
+   * See {@link ServerStreamTracer#addServerStatsTrailer}. For server-side only.
+   *
+   * <p>Called from {@link io.grpc.internal.ServerImpl}.
+   */
+  public void addServerStatsTrailer(Metadata trailers) {
+    for (StreamTracer tracer : tracers) {
+      if (tracer instanceof ServerStreamTracer) {
+        ((ServerStreamTracer) tracer).addServerStatsTrailer(trailers);
+      }
+    }
+  }
+
+  /**
+   * See {@link StreamTracer#streamClosed}. This is called from server side only to return
+   * {@link io.opencensus.common.ServerStats} in trailer.
    *
    * <p>Called from abstract stream implementations.
    */

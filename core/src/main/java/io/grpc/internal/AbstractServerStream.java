@@ -128,7 +128,7 @@ public abstract class AbstractServerStream extends AbstractStream
     Preconditions.checkNotNull(trailers, "trailers");
     if (!outboundClosed) {
       outboundClosed = true;
-      endOfMessages();
+      endOfMessages(trailers);
       addStatusToTrailers(trailers, status);
       // Safe to set without synchronization because access is tightly controlled.
       // closedStatus is only set from here, and is read from a place that has happen-after
