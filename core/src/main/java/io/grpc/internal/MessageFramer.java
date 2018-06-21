@@ -25,6 +25,7 @@ import io.grpc.Codec;
 import io.grpc.Compressor;
 import io.grpc.Drainable;
 import io.grpc.KnownLength;
+import io.grpc.Metadata;
 import io.grpc.Status;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -316,6 +317,17 @@ public class MessageFramer implements Framer {
    */
   @Override
   public void close() {
+    close(null);
+  }
+
+  /**
+   * Flushes and closes the framer and releases any buffers. After the framer is closed or
+   * disposed, additional calls to this method will have no affect.
+   *
+   * If trailers provided then adds trailers that propagates to remote.
+   */
+  @Override
+  public void close(@Nullable Metadata trailers) {
     if (!isClosed()) {
       closed = true;
       // With the current code we don't expect readableBytes > 0 to be possible here, added
@@ -324,6 +336,7 @@ public class MessageFramer implements Framer {
         releaseBuffer();
       }
       commitToSink(true, true);
+      statsTraceCtx.addServerStatsTrailer(trailers);
     }
   }
 

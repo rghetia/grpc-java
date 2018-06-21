@@ -23,7 +23,9 @@ import com.google.common.annotations.VisibleForTesting;
 import io.grpc.Codec;
 import io.grpc.Compressor;
 import io.grpc.Decompressor;
+import io.grpc.Metadata;
 import java.io.InputStream;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 
 /**
@@ -68,8 +70,8 @@ public abstract class AbstractStream implements Stream {
    * Closes the underlying framer. Should be called when the outgoing stream is gracefully closed
    * (half closure on client; closure on server).
    */
-  protected final void endOfMessages() {
-    framer().close();
+  protected final void endOfMessages(@Nullable Metadata trailers) {
+    framer().close(trailers);
   }
 
   @Override
